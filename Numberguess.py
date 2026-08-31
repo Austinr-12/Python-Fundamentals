@@ -1,9 +1,37 @@
 import random
 
+BANNER = r"""
+  _   _                 _                 _____                     
+ | \ | |_   _ _ __ ___ | |__   ___ _ __  |  ___|__ _ __ __ _  ___    
+ |  \| | | | | '_ ` _ \| '_ \ / _ \ '__| | |_ / _ \ '__/ _` |/ _ \   
+ | |\  | |_| | | | | | | |_) |  __/ |    |  _|  __/ | | (_| |  __/   
+ |_| \_|\__,_|_| |_| |_|_.__/ \___|_|    |_|  \___|_|  \__,_|\___|   
+                    G U E S S I N G   G A M E
+"""
+
+
+def draw_chances(used, total):
+    """Show remaining chances as a row of hearts."""
+    left = total - used
+    return '  Chances: ' + ('♥ ' * left) + ('· ' * used) + f' ({left} left)'
+
+
+def draw_range(low, high, guess):
+    """Draw the guess on a number line between low and high."""
+    width = 40
+    span = high - low if high > low else 1
+    pos = int((guess - low) / span * (width - 1))
+    pos = max(0, min(width - 1, pos))
+    line = ['-'] * width
+    line[pos] = '^'
+    return f'  {low} |' + ''.join(line) + f'| {high}'
+
+
+print(BANNER)
 print("Hello!, Welcome to the Number Guessing Game. \n You have 7 chances to guess the number. Let's start!")
 
 low = int(input("Enter the Lower Bound: "))
-high = int(input("Enter the upper Bound"))
+high = int(input("Enter the upper Bound: "))
 
 print(f"\nYou have 7 chances to guess the number between {low} and {high}")
 
@@ -16,10 +44,16 @@ ch = 7
 gc = 0
 
 while gc < ch:
-    gc += 1 
+    print(draw_chances(gc, ch))
+    gc += 1
     guess = int(input('Enter your guess: '))
 
+    print(draw_range(low, high, guess))
+
     if guess == num:
+        print('  ***  ')
+        print(' * ! * ')
+        print('  ***  ')
         print(f'Correct! The number is {num} You guessed it in {gc} attempts.')
         break
 
@@ -27,9 +61,7 @@ while gc < ch:
         print(f'Sorry! that number was {num} Better luck next time.')
 
     elif guess > num:
-        print('Too High! Try a lower number.')
+        print('Too High! Try a lower number.  v')
 
     elif guess < num:
-        print('Too low! Try a higher number.')
-
-        
+        print('Too low! Try a higher number.  ^')
