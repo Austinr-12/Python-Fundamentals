@@ -42,3 +42,11 @@ while turns > 0:
     if len(guess) != 1:
         print("Please enter a single character")
         continue
+
+    #check for duplicates
+    if guess in guesses:
+        print("You already guessed that character.")
+        continue
+
+    #store the guess
+    guesses += guess 
