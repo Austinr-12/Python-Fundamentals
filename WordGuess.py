@@ -50,3 +50,14 @@ while turns > 0:
 
     #store the guess
     guesses += guess 
+
+    #incorrect guess
+    if guess not in word:
+        turns -= 1
+        print("Wrong")
+        print("You have", turns, "more guesses")
+
+        #check if loss has occurred
+        if turns == 0:
+            print("You Lose")
+            print("The word was:", word)
