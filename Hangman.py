@@ -60,3 +60,15 @@ hangman = [
 
 print("Welcome to Hangman!")
 print("Hint: The word is a fruit.")
+
+while wrong_guesses < max_attempts:
+    display = ""
+
+    for letter in word:
+        if letter in guessed:
+            display += letter + " "
+        else:
+            display += "_"
+
+    print(hangman[wrong_guesses])
+    print("Word:", display)
