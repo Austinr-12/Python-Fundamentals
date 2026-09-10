@@ -90,4 +90,13 @@ while wrong_guesses < max_attempts:
 
     guessed.append(guess)
 
-    
+    if guess in word:
+        print("Correct guess!")
+    else:
+        wrong_guesses += 1
+        print("Wrong guess!")
+
+else:
+    print(hangman[wrong_guesses])
+    print("Game Over!")
+    print("The fruit was:", word)
