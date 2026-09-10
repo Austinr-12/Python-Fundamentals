@@ -72,3 +72,10 @@ while wrong_guesses < max_attempts:
 
     print(hangman[wrong_guesses])
     print("Word:", display)
+
+    if "_" not in display:
+        print("Congratulations! You won!")
+        print("The fruit was:", word)
+        break
+
+    guess = input("Guess a letter: ").lower()
