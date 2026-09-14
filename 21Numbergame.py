@@ -17,3 +17,12 @@ def check(xyz):
             return False
         i += 1
     return True
+
+def start1():
+    xyz = []
+    last = 0
+
+    while True:
+        print("Enter 'F' to take the first chance.")
+        print("Enter 'S' to take the second chance.")
+        chance = input('> ')
