@@ -54,3 +54,20 @@ def start1():
 
                 if last == 21:
                     lose1()
+
+                print("\nComputer's Turn:")
+                for j in range(1, comp + 1):
+                    xyz.append(last + j)
+
+                print("Numbers after computer's turn:", xyz)
+                last = xyz[-1]
+
+            elif chance.upper() == "S":
+                comp = 1
+                last = 0
+                while last < 20:
+                    print("\nComputer's Turn:")
+                    for j in range(1, comp + 1):
+                        xyz.append(last + j)
+
+                    print("numbers after computer's turn:", xyz)
