@@ -71,3 +71,20 @@ def start1():
                         xyz.append(last + j)
 
                     print("numbers after computer's turn:", xyz)
+
+                    if xyz[-1] == 20:
+                        lose1()
+
+                    print("\nYour Turn.")
+                    inp = int(input("How many numbers do you wish to enter" \
+                    "? (1-3)\n> "))
+
+                    print("Enter your numbers:")
+                    for _ in range(inp):
+                        xyz.append(int(input('>')))
+
+                    last = xyz[-1]
+
+                    if not check(xyz):
+                        print("\nYou did not enter consecutive integers.")
+                        
