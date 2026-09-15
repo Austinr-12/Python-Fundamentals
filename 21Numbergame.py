@@ -99,5 +99,27 @@ def start1():
                     print("YOU WON!")
                     exit(0)
 
-                else:
+            else:
                     print("Wrong choice. Please enter F or S.")
+
+    game = True
+
+    while game:
+        print("\nPlayer 2 is Computer.")
+        ans = input("Do you wnat to play the 21 number game? " \
+        "(Yes / No)\n> ")
+
+        if ans.lower() == 'yes':
+            start1()
+        else:
+            nex = input("Do you want to quit the game?" \
+            " (Yes / No)\n> ")
+
+            if nex.lower() == "yes":
+                print("You are quitting the game...")
+                exit(0)
+
+            elif nex.lower() == "no":
+                print("Continuing...")
+            else:
+                print("Wrong choice")
