@@ -41,3 +41,16 @@ def start1():
                     print("Wrong input. You are disqualified from " \
                     "the game.")
                     lose1()
+
+                print("Enter your numbers:")
+                for _ in range(inp):
+                    xyz.append(int(input('>')))
+
+                last = xyz[-1]
+
+                if not check(xyz):
+                    print("\nYou did not enter consecutive integers.")
+                    lose1()
+
+                if last == 21:
+                    lose1()
