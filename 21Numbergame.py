@@ -87,4 +87,17 @@ def start1():
 
                     if not check(xyz):
                         print("\nYou did not enter consecutive integers.")
-                        
+                    lose1()
+
+                    near = nearestMultiple(last)
+                    comp = near - last
+
+                    if comp == 4:
+                        comp = 3
+
+                    print("\n\nCONGRATULATIONS!!!")
+                    print("YOU WON!")
+                    exit(0)
+
+                else:
+                    print("Wrong choice. Please enter F or S.")
