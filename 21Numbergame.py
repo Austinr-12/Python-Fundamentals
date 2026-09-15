@@ -26,3 +26,18 @@ def start1():
         print("Enter 'F' to take the first chance.")
         print("Enter 'S' to take the second chance.")
         chance = input('> ')
+
+    if chance.upper() == "F":
+        while True:
+            if last == 20:
+                lose1()
+                print("\nYour Turn.")
+                inp = int(input("How many numbers do you wish" \
+                "to enter (1-3)\n> "))
+
+                if 1 <= inp <= 3:
+                    comp = 4 - inp
+                else:
+                    print("Wrong input. You are disqualified from " \
+                    "the game.")
+                    lose1()
