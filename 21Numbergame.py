@@ -1,40 +1,91 @@
 import sys
 import time
 
-# ANSI color codes for nicer terminal output
+# ANSI codes for nicer terminal output
 RESET = "\033[0m"
 BOLD = "\033[1m"
 DIM = "\033[2m"
+REVERSE = "\033[7m"
 RED = "\033[91m"
 GREEN = "\033[92m"
 YELLOW = "\033[93m"
 CYAN = "\033[96m"
 
 TARGET = 21
+WIDTH = 36  # inside width of every box
+COLORS = {"you": CYAN, "computer": RED}
+NAMES = {"you": "You", "computer": "Computer"}
 
 
-def banner():
-    print(CYAN + BOLD)
-    print("╔══════════════════════════════════════╗")
-    print("║         THE 21 NUMBER GAME           ║")
-    print("╚══════════════════════════════════════╝" + RESET)
-    print("Take turns counting up from 1.")
-    print("On each turn, say 1, 2, or 3 numbers in a row.")
-    print(f"Whoever is forced to say {BOLD}{TARGET}{RESET} loses!\n")
-    print(f"{CYAN}■ You{RESET}   {RED}■ Computer{RESET}\n")
+def clear_screen():
+    print("\033[2J\033[H", end="")
 
 
-def show_board(said):
-    """Print numbers 1-21 in a grid, colored by who said each one."""
+def box(lines, color):
+    """Print lines centered inside a double-line box."""
+    print(color + BOLD + "  ╔" + "═" * WIDTH + "╗")
+    for line in lines:
+        print("  ║" + line.center(WIDTH) + "║")
+    print("  ╚" + "═" * WIDTH + "╝" + RESET)
+
+
+def intro():
+    clear_screen()
     print()
-    for n in range(1, TARGET + 1):
-        if n in said:
-            color = CYAN if said[n] == "you" else RED
-            cell = f"{color}{BOLD}{n:>3}{RESET}"
-        else:
-            cell = f"{DIM}{n:>3}{RESET}"
-        end = "\n" if n % 7 == 0 else " "
-        print(cell, end=end)
+    box(["THE 21 NUMBER GAME"], CYAN)
+    print()
+    print("  Take turns counting up from 1.")
+    print("  On each turn, say 1, 2, or 3 numbers.")
+    print(f"  Whoever is forced to say {BOLD}{TARGET}{RESET} loses!")
+    print()
+
+
+def show_score(score):
+    print(f"  {CYAN}{BOLD}You {score['you']}{RESET}"
+          f"  {DIM}vs{RESET}  "
+          f"{RED}{BOLD}Computer {score['computer']}{RESET}")
+
+
+def show_board(said, recent):
+    """Numbers 1-21 in a grid, colored by who said them; latest move highlighted."""
+    print("  ┌" + "─" * WIDTH + "┐")
+    for row_start in range(1, TARGET + 1, 7):
+        cells = []
+        for n in range(row_start, row_start + 7):
+            if n in said:
+                style = COLORS[said[n]] + BOLD
+                if n in recent:
+                    style += REVERSE
+            else:
+                style = DIM
+            cells.append(f"{style} {n:>2} {RESET}")
+        print("  │ " + " ".join(cells) + " │")
+    print("  └" + "─" * WIDTH + "┘")
+
+
+def show_progress(last):
+    """A bar that turns from green to yellow to red as the count nears 21."""
+    if last >= 17:
+        color = RED
+    elif last >= 13:
+        color = YELLOW
+    else:
+        color = GREEN
+    bar = color + "█" * last + RESET + DIM + "░" * (TARGET - last) + RESET
+    print(f"  Count  {bar}  {BOLD}{last:>2}/{TARGET}{RESET}")
+
+
+def render(said, recent, last, score, log):
+    clear_screen()
+    print()
+    box(["THE 21 NUMBER GAME"], CYAN)
+    show_score(score)
+    print()
+    show_board(said, recent)
+    show_progress(last)
+    print()
+    for line in log[-3:]:  # the last few moves
+        print("  " + line)
     print()
 
 
@@ -44,7 +95,7 @@ def ask_int(prompt, low, high):
         answer = input(prompt).strip()
         if answer.isdigit() and low <= int(answer) <= high:
             return int(answer)
-        print(f"{YELLOW}Please enter a number from {low} to {high}.{RESET}")
+        print(f"  {YELLOW}Please enter a number from {low} to {high}.{RESET}")
 
 
 def computer_move(last):
@@ -55,62 +106,79 @@ def computer_move(last):
     return min(count, TARGET - last)
 
 
-def say_numbers(said, last, count, who):
-    numbers = list(range(last + 1, last + count + 1))
-    for n in numbers:
-        said[n] = who
-    color = CYAN if who == "you" else RED
-    name = "You" if who == "you" else "Computer"
-    print(f"{color}{BOLD}{name} said: {', '.join(map(str, numbers))}{RESET}")
-    return numbers[-1]
+def thinking():
+    print(f"  {DIM}Computer is thinking", end="", flush=True)
+    for _ in range(3):
+        time.sleep(0.3)
+        print(".", end="", flush=True)
+    print(RESET)
 
 
-def play():
+def play(score):
     said = {}
+    recent = []
+    log = []
     last = 0
 
+    render(said, recent, last, score, log)
     choice = ""
     while choice not in ("F", "S"):
-        choice = input("Go (F)irst or (S)econd? > ").strip().upper()
+        choice = input("  Go (F)irst or (S)econd? > ").strip().upper()
     turn = "you" if choice == "F" else "computer"
 
     while last < TARGET:
-        show_board(said)
+        render(said, recent, last, score, log)
         if turn == "you":
             max_count = min(3, TARGET - last)
             options = "1" if max_count == 1 else f"1-{max_count}"
-            count = ask_int(f"Your turn! How many numbers ({options})? > ",
+            count = ask_int(f"  Your turn! How many numbers ({options})? > ",
                             1, max_count)
-            last = say_numbers(said, last, count, "you")
-            if last == TARGET:
-                show_board(said)
-                print(f"{RED}{BOLD}You said {TARGET}. YOU LOSE!{RESET}")
-                print("Better luck next time!\n")
-                return
-            turn = "computer"
+            recent = list(range(last + 1, last + count + 1))
+            for n in recent:
+                said[n] = "you"
+            last = recent[-1]
         else:
-            print(f"{DIM}Computer is thinking...{RESET}")
-            time.sleep(0.8)
-            last = say_numbers(said, last, computer_move(last), "computer")
-            if last == TARGET:
-                show_board(said)
-                print(f"{GREEN}{BOLD}Computer said {TARGET}. "
-                      f"CONGRATULATIONS, YOU WON!{RESET}\n")
-                return
-            turn = "you"
+            thinking()
+            count = computer_move(last)
+            recent = []
+            for n in range(last + 1, last + count + 1):  # reveal one at a time
+                said[n] = "computer"
+                recent.append(n)
+                last = n
+                render(said, recent, last, score, log)
+                time.sleep(0.35)
+
+        numbers = ", ".join(map(str, recent))
+        log.append(f"{COLORS[turn]}{BOLD}{NAMES[turn]:>8}{RESET} said {numbers}")
+        turn = "computer" if turn == "you" else "you"
+
+    # Whoever just said 21 lost, so the player whose turn it is now wins
+    winner = turn
+    score[winner] += 1
+    render(said, recent, last, score, log)
+    if winner == "you":
+        box(["YOU WIN!", "The computer said 21."], GREEN)
+    else:
+        box(["YOU LOSE!", "You said 21.", "Better luck next time!"], RED)
+    print()
 
 
 def main():
-    banner()
+    score = {"you": 0, "computer": 0}
+    intro()
+    prompt = "  Ready to play? (yes/no) > "
     while True:
-        answer = input("Do you want to play? (yes/no) > ").strip().lower()
+        answer = input(prompt).strip().lower()
         if answer in ("yes", "y"):
-            play()
+            play(score)
+            prompt = "  Play again? (yes/no) > "
         elif answer in ("no", "n"):
-            print("Thanks for playing! Goodbye.")
+            print()
+            show_score(score)
+            print("  Thanks for playing! Goodbye.\n")
             sys.exit(0)
         else:
-            print(f"{YELLOW}Please type yes or no.{RESET}")
+            print(f"  {YELLOW}Please type yes or no.{RESET}")
 
 
 if __name__ == "__main__":
