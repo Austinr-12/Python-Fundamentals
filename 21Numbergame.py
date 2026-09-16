@@ -1,125 +1,117 @@
-def nearestMultiple(num):
-    if num >= 4:
-        near = num + (4 - (num % 4))
-    else:
-        near = 4
-    return near
+import sys
+import time
 
-def lose1():
-    print("\n\nYOU LOSE!")
-    print("Better luck next time!")
-    exit(0)
+# ANSI color codes for nicer terminal output
+RESET = "\033[0m"
+BOLD = "\033[1m"
+DIM = "\033[2m"
+RED = "\033[91m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+CYAN = "\033[96m"
 
-def check(xyz):
-    i = 1
-    while i < len(xyz):
-        if (xyz[i] - xyz[i - 1]) != 1:
-            return False
-        i += 1
-    return True
+TARGET = 21
 
-def start1():
-    xyz = []
+
+def banner():
+    print(CYAN + BOLD)
+    print("╔══════════════════════════════════════╗")
+    print("║         THE 21 NUMBER GAME           ║")
+    print("╚══════════════════════════════════════╝" + RESET)
+    print("Take turns counting up from 1.")
+    print("On each turn, say 1, 2, or 3 numbers in a row.")
+    print(f"Whoever is forced to say {BOLD}{TARGET}{RESET} loses!\n")
+    print(f"{CYAN}■ You{RESET}   {RED}■ Computer{RESET}\n")
+
+
+def show_board(said):
+    """Print numbers 1-21 in a grid, colored by who said each one."""
+    print()
+    for n in range(1, TARGET + 1):
+        if n in said:
+            color = CYAN if said[n] == "you" else RED
+            cell = f"{color}{BOLD}{n:>3}{RESET}"
+        else:
+            cell = f"{DIM}{n:>3}{RESET}"
+        end = "\n" if n % 7 == 0 else " "
+        print(cell, end=end)
+    print()
+
+
+def ask_int(prompt, low, high):
+    """Keep asking until the user enters a whole number between low and high."""
+    while True:
+        answer = input(prompt).strip()
+        if answer.isdigit() and low <= int(answer) <= high:
+            return int(answer)
+        print(f"{YELLOW}Please enter a number from {low} to {high}.{RESET}")
+
+
+def computer_move(last):
+    """Try to land on a multiple of 4 (4, 8, 12, 16, 20)."""
+    count = 4 - (last % 4)
+    if count == 4:  # already on a multiple of 4, no winning move
+        count = 1
+    return min(count, TARGET - last)
+
+
+def say_numbers(said, last, count, who):
+    numbers = list(range(last + 1, last + count + 1))
+    for n in numbers:
+        said[n] = who
+    color = CYAN if who == "you" else RED
+    name = "You" if who == "you" else "Computer"
+    print(f"{color}{BOLD}{name} said: {', '.join(map(str, numbers))}{RESET}")
+    return numbers[-1]
+
+
+def play():
+    said = {}
     last = 0
 
-    while True:
-        print("Enter 'F' to take the first chance.")
-        print("Enter 'S' to take the second chance.")
-        chance = input('> ')
+    choice = ""
+    while choice not in ("F", "S"):
+        choice = input("Go (F)irst or (S)econd? > ").strip().upper()
+    turn = "you" if choice == "F" else "computer"
 
-    if chance.upper() == "F":
-        while True:
-            if last == 20:
-                lose1()
-                print("\nYour Turn.")
-                inp = int(input("How many numbers do you wish" \
-                "to enter (1-3)\n> "))
-
-                if 1 <= inp <= 3:
-                    comp = 4 - inp
-                else:
-                    print("Wrong input. You are disqualified from " \
-                    "the game.")
-                    lose1()
-
-                print("Enter your numbers:")
-                for _ in range(inp):
-                    xyz.append(int(input('>')))
-
-                last = xyz[-1]
-
-                if not check(xyz):
-                    print("\nYou did not enter consecutive integers.")
-                    lose1()
-
-                if last == 21:
-                    lose1()
-
-                print("\nComputer's Turn:")
-                for j in range(1, comp + 1):
-                    xyz.append(last + j)
-
-                print("Numbers after computer's turn:", xyz)
-                last = xyz[-1]
-
-            elif chance.upper() == "S":
-                comp = 1
-                last = 0
-                while last < 20:
-                    print("\nComputer's Turn:")
-                    for j in range(1, comp + 1):
-                        xyz.append(last + j)
-
-                    print("numbers after computer's turn:", xyz)
-
-                    if xyz[-1] == 20:
-                        lose1()
-
-                    print("\nYour Turn.")
-                    inp = int(input("How many numbers do you wish to enter" \
-                    "? (1-3)\n> "))
-
-                    print("Enter your numbers:")
-                    for _ in range(inp):
-                        xyz.append(int(input('>')))
-
-                    last = xyz[-1]
-
-                    if not check(xyz):
-                        print("\nYou did not enter consecutive integers.")
-                    lose1()
-
-                    near = nearestMultiple(last)
-                    comp = near - last
-
-                    if comp == 4:
-                        comp = 3
-
-                    print("\n\nCONGRATULATIONS!!!")
-                    print("YOU WON!")
-                    exit(0)
-
-            else:
-                    print("Wrong choice. Please enter F or S.")
-
-    game = True
-
-    while game:
-        print("\nPlayer 2 is Computer.")
-        ans = input("Do you wnat to play the 21 number game? " \
-        "(Yes / No)\n> ")
-
-        if ans.lower() == 'yes':
-            start1()
+    while last < TARGET:
+        show_board(said)
+        if turn == "you":
+            max_count = min(3, TARGET - last)
+            options = "1" if max_count == 1 else f"1-{max_count}"
+            count = ask_int(f"Your turn! How many numbers ({options})? > ",
+                            1, max_count)
+            last = say_numbers(said, last, count, "you")
+            if last == TARGET:
+                show_board(said)
+                print(f"{RED}{BOLD}You said {TARGET}. YOU LOSE!{RESET}")
+                print("Better luck next time!\n")
+                return
+            turn = "computer"
         else:
-            nex = input("Do you want to quit the game?" \
-            " (Yes / No)\n> ")
+            print(f"{DIM}Computer is thinking...{RESET}")
+            time.sleep(0.8)
+            last = say_numbers(said, last, computer_move(last), "computer")
+            if last == TARGET:
+                show_board(said)
+                print(f"{GREEN}{BOLD}Computer said {TARGET}. "
+                      f"CONGRATULATIONS, YOU WON!{RESET}\n")
+                return
+            turn = "you"
 
-            if nex.lower() == "yes":
-                print("You are quitting the game...")
-                exit(0)
 
-            elif nex.lower() == "no":
-                print("Continuing...")
-            else:
-                print("Wrong choice")
+def main():
+    banner()
+    while True:
+        answer = input("Do you want to play? (yes/no) > ").strip().lower()
+        if answer in ("yes", "y"):
+            play()
+        elif answer in ("no", "n"):
+            print("Thanks for playing! Goodbye.")
+            sys.exit(0)
+        else:
+            print(f"{YELLOW}Please type yes or no.{RESET}")
+
+
+if __name__ == "__main__":
+    main()
