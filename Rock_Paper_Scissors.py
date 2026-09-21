@@ -22,3 +22,12 @@ while True:
     except ValueError:
         print("Please enter a valid number.\n")
         continue
+
+    while choice < 1 or choice > 3:
+        choice = int(input("Please enter a valid choice (1-3): "))
+
+    #User choice
+    user_choice = choice[choices - 1]
+
+    print("\nUser choice is:", user_choice)
+    print("Now it's Computer's Turn...")
