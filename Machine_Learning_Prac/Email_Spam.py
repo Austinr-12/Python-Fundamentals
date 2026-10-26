@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 import string
+from pathlib import Path
 import nltk
 from nltk.corpus import stopwords
 from wordcloud import WordCloud
@@ -19,4 +20,4 @@ import warnings
 warnings.filterwarnings('ignore')
 
 data = pd.read_csv('spam_ham_dataset.csv')
-data.head()
+print(data.head())
