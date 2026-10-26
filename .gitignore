@@ -1,1 +1,7 @@
 .venv/
+.DS_Store
+.qodo/
+__pycache__/
+
+# datasets
+*.csv
